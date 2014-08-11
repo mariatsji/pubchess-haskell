@@ -8,7 +8,7 @@ description:
 data-dir: ""
  
 executable pubchess
-    build-depends: QuickCheck -any, base -any
+    build-depends: QuickCheck -any, base -any, directory -any
     main-is: Main.hs
     buildable: True
     hs-source-dirs: src
