@@ -1,0 +1,10 @@
+Version of workspace file format:
+               1
+Time of storage:
+               "Mon Aug 11 08:28:28 W. Europe Daylight Time 2014"
+Name of the workspace:
+               "PubChess"
+File paths of contained packages:
+               ["pubchess.cabal"]
+Maybe file path of an active package:
+               Just "pubchess.cabal"
