@@ -26,31 +26,17 @@ single (x:xs) = (combos x xs) ++ if (null xs)
                                     then []
                                     else single xs
 
+double :: [Player] -> [Match]
+double x = single x ++ map flipM (single x)
+
 twine :: [Match] -> [Match]
 twine x = map (\(a,b) -> if odd a then b else flipM b) (zip [1 .. (length x)] x)
 
---main = do
---    putStrLn . show $ twine $ single [(Player "Sjur" 1200.0),
---        (Player "Nat" 1200.0),
---        (Player "Aasmund" 1200.0),
---        (Player "Trond" 1200.0)]
-
 main = do
-    putStrLn "Welcome to PubChess. Commands are help, single, double, list, result, save"
---    cmdLine <- getLine
-    let cmd = words "help me please"
-    process (head cmd) (tail cmd)
+    args <- getArgs
+    cmd <- getLine
+    process $ words cmd
 
-process :: String -> [String] -> IO ()
-process "help" xs = help (head xs) (tail xs)
-process _ xs = putStr "Unrecognized command"
-
-help :: String -> [String] -> IO ()
-help "help" _ = putStr "Prints some help, dude!"
-help "list" _ = putStr "lists matches in tournament"
-help "result" _ = putStr "result [match nr] <'white','black','remis'> adds a result"
-help "save" _ = putStr "save tournament result to file"
-help "single" _ = putStr "single Player1 Player2 .. Creates a tournament where all players play only 1 match against everyone else"
-help "double" _ = putStr "double Player1 Player 2 .. Creates a tournament where all players play 2 matches against everyone else"
-
-help x xs = putStr "Helping"
+process :: [String] -> IO ()
+process [] = "Unknown command"
+process _ = putStrLn "Processing .."
