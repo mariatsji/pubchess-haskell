@@ -6,6 +6,7 @@ import Control.Monad
 import Data.List
 import Data.Bits
 import Data.Maybe
+import Data.Char
 import System.Environment
 import System.Directory
 import System.IO
@@ -59,19 +60,16 @@ process m = do
 
 
 result :: String -> [(Int, Match)] -> [(Int, Match)]
-result c [] = []
+result cmd [] = []
 result [] xs = []
-result c xs = map (\(i,x) ->
-                    if i == n
-                        then matchResult x r
-                        else x) xs
-            where   n = head $ words c
-                    r = head $ tail $ words c
+result cmd xs = (take (n - 1) xs) ++ (n, matchResult (snd (xs !! (n - 1))) res) : (drop n xs)
+                        where   n = read $ head $ words cmd
+                                res = head $ tail $ words cmd
 
-matchResult :: (Int, Match) -> String -> (Int, Match)
-matchResult (a, Match white black result) "white" = (a, Match white black White)
-matchResult (a, Match white black result) "black" = (a, Match white black Black)
-matchResult (a, Match white black result) "remis" = (a, Match white black Remis)
+matchResult :: Match -> String -> Match
+matchResult (Match white black result) "white" = Match white black White
+matchResult (Match white black result) "black" = Match white black Black
+matchResult (Match white black result) "remis" = Match white black Remis
 
 
 print' :: [(Int, Match)] -> IO ()
