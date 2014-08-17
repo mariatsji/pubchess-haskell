@@ -27,6 +27,7 @@ single [] = []
 single (x:xs) = (combos x xs) ++ if (null xs)
                                     then []
                                     else single xs
+
 double :: [Player] -> [Match]
 double x = single x ++ map flipM (single x)
 
@@ -36,6 +37,27 @@ players x = map Player x
 
 twine :: [Match] -> [Match]
 twine x = map (\(a,b) -> if odd a then b else flipM b) (zip [1 .. (length x)] x)
+
+result :: String -> [(Int, Match)] -> [(Int, Match)]
+result cmd [] = []
+result [] xs = []
+result cmd xs = (take (n - 1) xs) ++ (n, matchResult (snd (xs !! (n - 1))) res) : (drop n xs)
+                        where   n = read $ head $ words cmd
+                                res = head $ tail $ words cmd
+
+matchResult :: Match -> String -> Match
+matchResult (Match white black result) "white" = Match white black White
+matchResult (Match white black result) "black" = Match white black Black
+matchResult (Match white black result) "remis" = Match white black Remis
+
+createMatches :: String -> [Player] -> [Match]
+createMatches [] [] = []
+createMatches n [] = []
+createMatches "single" p = twine $ single p
+createMatches "double" p = double p
+
+lines' :: [(Int, Match)] -> String
+lines' m = unwords $ map (\m -> show m ++ "\n") m
 
 main = do
     putStrLn "Welcome. Whats the tournament called?"
@@ -58,26 +80,10 @@ process m = do
     let m' = result cmd m
     process m'
 
-
-result :: String -> [(Int, Match)] -> [(Int, Match)]
-result cmd [] = []
-result [] xs = []
-result cmd xs = (take (n - 1) xs) ++ (n, matchResult (snd (xs !! (n - 1))) res) : (drop n xs)
-                        where   n = read $ head $ words cmd
-                                res = head $ tail $ words cmd
-
-matchResult :: Match -> String -> Match
-matchResult (Match white black result) "white" = Match white black White
-matchResult (Match white black result) "black" = Match white black Black
-matchResult (Match white black result) "remis" = Match white black Remis
-
-
 print' :: [(Int, Match)] -> IO ()
 print' [] = putStrLn ""
 print' m = mapM_ print m
 
-createMatches :: String -> [Player] -> [Match]
-createMatches [] [] = []
-createMatches n [] = []
-createMatches "single" p = twine $ single p
-createMatches "double" p = double p
+save :: String -> [(Int, Match)] -> IO ()
+save filename matches = do
+    writeFile filename (lines' matches)
