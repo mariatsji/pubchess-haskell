@@ -10,6 +10,7 @@ import Data.Char
 import System.Environment
 import System.Directory
 import System.IO
+import System.Exit
 
 data Player = Player String deriving (Eq,Show)
 data Result = Unplayed | Remis | White | Black deriving (Eq,Show)
@@ -37,6 +38,10 @@ players x = map Player x
 
 twine :: [Match] -> [Match]
 twine x = map (\(a,b) -> if odd a then b else flipM b) (zip [1 .. (length x)] x)
+
+twine' :: [Match] -> [Match]
+twine' xs = foldr (\x acc -> (if odd $ length acc then x else flipM x) : acc) [] xs
+
 
 result :: String -> [(Int, Match)] -> [(Int, Match)]
 result cmd [] = []
@@ -69,16 +74,26 @@ main = do
     let ps = players $ words playerN
         matches = createMatches single ps
         matches' = zip [1 .. (length matches)] matches
-    process matches'
+    process "" matches'
     putStrLn "Good games!"
 
-process :: [(Int, Match)] -> IO ()
-process m = do
+process :: String -> [(Int, Match)] -> IO ()
+process f m = do
+    print m
+    putStrLn "Enter result (e.g. '1 white', '2 remis', '3 black'), save <filename> or quit"
+    cmd <- getLine
+    if cmd == "save"
+        then save f m
+        else if cmd == "quit"
+            then exitSuccess
+            else updateMatches m
+
+updateMatches :: [(Int, Match)] -> IO ()
+updateMatches m = do
     print' m
-    putStrLn "Enter result (e.g. '1 white', '2 remis', '3 black')"
     cmd <- getLine
     let m' = result cmd m
-    process m'
+    process cmd m'
 
 print' :: [(Int, Match)] -> IO ()
 print' [] = putStrLn ""
@@ -86,4 +101,5 @@ print' m = mapM_ print m
 
 save :: String -> [(Int, Match)] -> IO ()
 save filename matches = do
-    writeFile filename (lines' matches)
+    writeFile filename $ lines' matches
+    putStrLn $ "Saved matches to " ++ filename
